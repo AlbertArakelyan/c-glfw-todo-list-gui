@@ -23,7 +23,7 @@ int main() {
 
   while(!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.05f, 0.05f, 0.05f, 1.0f); // or 0.1f, 0.1f, 0.1f, 1.0f
 
     lf_begin();
 
@@ -32,6 +32,21 @@ int main() {
     lf_push_font(&titleFont); // Texts inside will use the mentioned font
     lf_text("Your To Do");
     lf_pop_font(); // Texts inside will use the mentioned font
+
+    {
+      const float width = 160.0f;
+
+      lf_set_ptr_x_absolute(winw - width - WIN_MARGIN * 2.0f); // sets a pointer for the next element to a given value
+      LfUIElementProps props = lf_get_theme().button_props;
+      props.margin_left = 0.0f; props.margin_top = 0.0f;
+      props.color = (LfColor){65, 167, 204, 255};
+      props.border_width = 0.0f; props.corner_radius = 4.0f;
+      lf_push_style_props(props); // Mentioned props/styles will apply to the elements between this push/pop calls
+      lf_set_line_should_overflow(false);
+      lf_button_fixed("New Task", width, -1); // -1 takes normal height
+      // lf_set_line_should_overflow(true);
+      lf_pop_style_props(); // Mentioned props/styles will apply to the elements between this push/pop calls
+    }
 
     lf_div_end();
     lf_end();
