@@ -22,4 +22,12 @@ especially updating OpenGL version at this URL: https://stackoverflow.com/questi
 sudo apt-get install pkg-config
 ```
 
-\* installed `lclibboard` from here: https://github.com/jtanx/libclipboard
+\* Installed `lclibboard` from here: https://github.com/jtanx/libclipboard
+
+\* Installed `cglm` in this way, which is not a direct dependency for this project, but dependency of depdendencies and in general good package in general. Here is the installation guide:
+```bash
+sudo apt update
+sudo apt install build-essential
+sudo apt install libcglm-dev
+```
+Read more about cglm [here](./docs_and_aboout_libs/cglm.md)
