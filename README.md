@@ -3,5 +3,23 @@ https://shnoh171.github.io/gpu%20and%20gpu%20programming/2019/08/26/installing-g
 
 ## Build Command
 ```bash
-gcc todo.c -o todo.exe -lglfw -lGL
+gcc todo.c -o todo-app -lglfw -lGL -lleif -lclipboard -lm -lxcb
 ```
+
+## Additional Information
+
+\* Added this package `lxcb` linking because of this error as -lclipboard is depending on this
+```
+/usr/bin/ld: /usr/local/lib/libclipboard.a(clipboard_x11.c.o): undefined reference to symbol 'xcb_get_setup'
+/usr/bin/ld: /lib/x86_64-linux-gnu/libxcb.so.1: error adding symbols: DSO missing from command line
+```
+
+\* Which package gave error googled how to install or how to fix <br>
+especially updating OpenGL version at this URL: https://stackoverflow.com/questions/19901934/libpthread-so-0-error-adding-symbols-dso-missing-from-command-line
+
+\* For one of packages `pkg-config` package manageer was needed installed via this command
+```bash
+sudo apt-get install pkg-config
+```
+
+\* installed `lclibboard` from here: https://github.com/jtanx/libclipboard
