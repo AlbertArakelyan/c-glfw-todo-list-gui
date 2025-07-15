@@ -3,7 +3,7 @@ https://shnoh171.github.io/gpu%20and%20gpu%20programming/2019/08/26/installing-g
 
 ## Build Command
 ```bash
-gcc todo.c -o todo-app -lglfw -lGL -lleif -lclipboard -lm -lxcb
+gcc todo.c -o todo -lglfw -lGL -lleif -lclipboard -lm -lxcb
 ```
 
 ## Additional Information
