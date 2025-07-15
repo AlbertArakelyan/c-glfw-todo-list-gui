@@ -1,10 +1,20 @@
 #include <GLFW/glfw3.h>
 #include <leif/leif.h>
 
+typedef enum {
+  ALL = 0,
+  IN_PROGRESS,
+  COMPLETED,
+  LOW,
+  MEDIUM,
+  HIGH
+} entry_filter;
+
 #define WIN_MARGIN 20.0f
 
 static int winw = 1280, winh = 720;
 static LfFont titleFont;
+static entry_filter current_filter; 
 
 static void rendertopbar() {
   lf_push_font(&titleFont); // Texts inside will use the mentioned font
@@ -25,6 +35,48 @@ static void rendertopbar() {
     lf_set_line_should_overflow(true);
     lf_pop_style_props(); // Mentioned props/styles will apply to the elements between this push/pop calls
   }
+}
+
+static void renderfilters() {
+  uint32_t numfilters = 6;
+  static const char* filters[] = {"ALL", "IN PROGRESS", "COMPLETED", "LOW", "MEDIUM", "HIGH"};
+
+  LfUIElementProps props = lf_get_theme().text_props;
+  props.margin_top = 30.0f;
+  props.margin_left = 10.0f;
+  props.margin_right = 10.0f;
+  props.padding = 10.0f;
+  props.border_width = 0.0f;
+  props.color = LF_NO_COLOR;
+  props.text_color = LF_WHITE;
+  props.corner_radius = 8.0f;
+
+  float width = 0.0f;
+  float ptrx_before = lf_get_ptr_x();
+  float ptry_before = lf_get_ptr_y();
+  lf_push_style_props(props);
+  lf_set_no_render(true);
+  lf_set_ptr_y_absolute(lf_get_ptr_y() + 50.0f);
+  for (uint32_t i = 0; i < numfilters; i++) {
+    lf_button(filters[i]);
+  }
+  lf_set_no_render(false);
+  lf_set_ptr_y_absolute(ptry_before);
+  
+  width = lf_get_ptr_x() - ptrx_before - props.margin_right - props.padding;
+  lf_set_ptr_x_absolute(winw - width - WIN_MARGIN);
+
+  lf_set_line_should_overflow(false);
+  for (uint32_t i = 0; i < numfilters; i++) {
+    props.color = (current_filter == (entry_filter)i) ? (LfColor){255, 255, 255, 50} : LF_NO_COLOR;
+    // continue from here - https://youtu.be/xf2W1wZozbk?t=1503
+    lf_push_style_props(props);
+    if (lf_button(filters[i]) == LF_CLICKED) {
+      current_filter = (entry_filter)i;
+    }
+    lf_pop_style_props();
+  }
+  lf_set_line_should_overflow(true);
 }
 
 int main() {
@@ -51,40 +103,8 @@ int main() {
     lf_div_begin(((vec2s){WIN_MARGIN, WIN_MARGIN}), ((vec2s){winw - WIN_MARGIN * 2.0f, winh - WIN_MARGIN * 2.0f}), true);
 
     rendertopbar();
-
     lf_next_line(); // kinda <br>
-
-    {
-      uint32_t numfilters = 6;
-      static const char* filters[] = {"ALL", "IN PROGRESS", "COMPLETED", "LOW", "MEDIUM", "HIGH"};
-
-      LfUIElementProps props = lf_get_theme().text_props;
-      props.margin_top = 30.0f;
-      props.margin_right = 30.0f;
-      float width = 0.0f;
-      float ptrx_before = lf_get_ptr_x();
-      lf_push_style_props(props);
-      lf_set_no_render(true);
-      
-      for (uint32_t i = 0; i < numfilters; i++) {
-        lf_button(filters[i]);
-      }
-      
-      lf_set_no_render(false);
-      
-      width = lf_get_ptr_x() - ptrx_before - props.margin_right - props.padding;
-      lf_set_ptr_x_absolute(winw - width - WIN_MARGIN);
-
-      lf_set_line_should_overflow(false);
-
-      for (uint32_t i = 0; i < numfilters; i++) {
-        lf_push_style_props(props);
-        lf_button(filters[i]);
-        lf_pop_style_props();
-      }
-
-      lf_set_line_should_overflow(true);
-    }
+    renderfilters();
 
     lf_div_end();
     lf_end();
