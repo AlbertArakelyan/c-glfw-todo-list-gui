@@ -42,9 +42,10 @@ static void renderfilters() {
   static const char* filters[] = {"ALL", "IN PROGRESS", "COMPLETED", "LOW", "MEDIUM", "HIGH"};
 
   LfUIElementProps props = lf_get_theme().text_props;
-  props.margin_top = 30.0f;
+  props.color = LF_NO_COLOR;
   props.margin_left = 10.0f;
   props.margin_right = 10.0f;
+  props.margin_top = 30.0f;
   props.padding = 10.0f;
   props.border_width = 0.0f;
   props.color = LF_NO_COLOR;
@@ -65,11 +66,11 @@ static void renderfilters() {
   
   width = lf_get_ptr_x() - ptrx_before - props.margin_right - props.padding;
   lf_set_ptr_x_absolute(winw - width - WIN_MARGIN);
-
+  lf_pop_style_props();
+  
   lf_set_line_should_overflow(false);
   for (uint32_t i = 0; i < numfilters; i++) {
     props.color = (current_filter == (entry_filter)i) ? (LfColor){255, 255, 255, 50} : LF_NO_COLOR;
-    // continue from here - https://youtu.be/xf2W1wZozbk?t=1503
     lf_push_style_props(props);
     if (lf_button(filters[i]) == LF_CLICKED) {
       current_filter = (entry_filter)i;
