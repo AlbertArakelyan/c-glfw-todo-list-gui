@@ -136,7 +136,43 @@ int main() {
                     true);
       for (uint32_t i = 0; i < numentries; i++) {
         task_entry* entry = entries[i];
+        float priority_size = 15.0f;
+        float ptry_before = lf_get_ptr_y();
+        lf_set_ptr_x_absolute(lf_get_ptr_x() + 5.0f);
+        lf_set_ptr_y_absolute(lf_get_ptr_y() + 5.0f);
+        switch(entry->priority) {
+          case PRIORITY_LOW: {
+            lf_rect(priority_size, priority_size, (LfColor){76, 175, 80, 255}, 4.0f);
+            break;
+          }
+          case PRIORITY_MEDIUM: {
+            lf_rect(priority_size, priority_size, (LfColor){255, 235, 59, 255}, 4.0f);
+            break;
+          }
+          case PRIORITY_HIGH: {
+            lf_rect(priority_size, priority_size, (LfColor){244, 76, 54, 255}, 4.0f);
+            break;
+          }
+        }
+        lf_set_ptr_y_absolute(ptry_before);
+
+        {
+          LfUIElementProps props = lf_get_theme().checkbox_props;
+          props.border_width = 1.0f; props.corner_radius = 0.0f; props.margin_top = 0; props.padding = 5.0f;
+          props.margin_left = 10.0f;
+          props.color = lf_color_from_zto((vec4s){0.05f, 0.05f, 0.05f, 1.0f});
+          lf_push_style_props(props);
+          if (lf_checkbox("", &entry->completed, LF_NO_COLOR, ((LfColor){65, 167, 204, 255})) == LF_CLICKED) {
+
+          }
+          lf_pop_style_props();
+        }
+        LfUIElementProps props = lf_get_theme().text_props;
+        props.margin_top = 5.0f;
+        props.margin_left = 4.0f;
+        lf_push_style_props(props);
         lf_text(entry->desc);
+        lf_pop_style_props();
         lf_next_line();
       }
       lf_div_end();
