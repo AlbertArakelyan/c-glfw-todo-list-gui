@@ -2,19 +2,34 @@
 #include <leif/leif.h>
 
 typedef enum {
-  ALL = 0,
-  IN_PROGRESS,
-  COMPLETED,
-  LOW,
-  MEDIUM,
-  HIGH
+  FILTER_ALL = 0,
+  FILTER_IN_PROGRESS,
+  FILTER_COMPLETED,
+  FILTER_LOW,
+  FILTER_MEDIUM,
+  FILTER_HIGH
 } entry_filter;
+
+typedef enum {
+  PRIORITY_LOW = 0,
+  PRIORITY_MEDIUM,
+  PRIORITY_HIGH
+} entry_priority;
+
+typedef struct {
+  bool completed;
+  char* desc, *date;
+  entry_priority priority;
+} task_entry;
 
 #define WIN_MARGIN 20.0f
 
 static int winw = 1280, winh = 720;
 static LfFont titleFont;
-static entry_filter current_filter; 
+static entry_filter current_filter;
+
+static task_entry* entries[1024];
+static uint32_t numentries = 0;
 
 static void rendertopbar() {
   lf_push_font(&titleFont); // Texts inside will use the mentioned font
@@ -95,6 +110,13 @@ int main() {
 
   titleFont = lf_load_font("./fonts/inter-bold.ttf", 40);
 
+  task_entry* entry = (task_entry*)malloc(sizeof(entry));
+  entry->priority = PRIORITY_LOW;
+  entry->completed = false;
+  entry->date = "nothin";
+  entry->desc = "Buy a Hamster";
+  entries[numentries++] = entry;
+
   while(!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
     glClearColor(0.05f, 0.05f, 0.05f, 1.0f); // or 0.1f, 0.1f, 0.1f, 1.0f
@@ -106,6 +128,19 @@ int main() {
     rendertopbar();
     lf_next_line(); // kinda <br>
     renderfilters();
+    lf_next_line();
+    {
+      lf_div_begin(((vec2s){lf_get_ptr_x(), lf_get_ptr_y()}),
+                    ((vec2s){winw - lf_get_ptr_x() - WIN_MARGIN,
+                    (winh - lf_get_ptr_y() - WIN_MARGIN)}),
+                    true);
+      for (uint32_t i = 0; i < numentries; i++) {
+        task_entry* entry = entries[i];
+        lf_text(entry->desc);
+        lf_next_line();
+      }
+      lf_div_end();
+    }
 
     lf_div_end();
     lf_end();
