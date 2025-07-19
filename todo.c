@@ -31,6 +31,8 @@ static entry_filter current_filter;
 static task_entry* entries[1024];
 static uint32_t numentries = 0;
 
+static LfTexture removetexture;
+
 static void rendertopbar() {
   lf_push_font(&titleFont); // Texts inside will use the mentioned font
   lf_text("Your To Do");
@@ -110,7 +112,8 @@ int main() {
 
   titleFont = lf_load_font("./fonts/inter-bold.ttf", 40);
 
-  task_entry* entry = (task_entry*)malloc(sizeof(entry));
+  removetexture = lf_load_texture("./icons/remove.png", true, LF_TEX_FILTER_LINEAR);
+  task_entry* entry = (task_entry*)malloc(sizeof(task_entry));
   entry->priority = PRIORITY_LOW;
   entry->completed = false;
   entry->date = "nothin";
@@ -157,9 +160,19 @@ int main() {
         lf_set_ptr_y_absolute(ptry_before);
 
         {
+          LfUIElementProps props = lf_get_theme().button_props;
+          props.color = LF_NO_COLOR;
+          props.border_width = 0.0f; props.padding = 0.0f; props.margin_top = 1.0f; props.margin_left = 10.0f;
+          lf_push_style_props(props);
+          if (lf_image_button(((LfTexture){.id = removetexture.id, .width = 20, .height = 20})) == LF_CLICKED) {
+
+          }
+          lf_pop_style_props();
+        }
+        {
           LfUIElementProps props = lf_get_theme().checkbox_props;
           props.border_width = 1.0f; props.corner_radius = 0.0f; props.margin_top = 0; props.padding = 5.0f;
-          props.margin_left = 10.0f;
+          props.margin_left = 5.0f;
           props.color = lf_color_from_zto((vec4s){0.05f, 0.05f, 0.05f, 1.0f});
           lf_push_style_props(props);
           if (lf_checkbox("", &entry->completed, LF_NO_COLOR, ((LfColor){65, 167, 204, 255})) == LF_CLICKED) {
