@@ -25,7 +25,7 @@ typedef struct {
 #define WIN_MARGIN 20.0f
 
 static int winw = 1280, winh = 720;
-static LfFont titleFont;
+static LfFont titleFont, smallFont;
 static entry_filter current_filter;
 
 static task_entry* entries[1024];
@@ -111,6 +111,7 @@ int main() {
   lf_set_theme(theme);
 
   titleFont = lf_load_font("./fonts/inter-bold.ttf", 40);
+  smallFont = lf_load_font("./fonts/inter.ttf", 20);
 
   removetexture = lf_load_texture("./icons/remove.png", true, LF_TEX_FILTER_LINEAR);
   task_entry* entry = (task_entry*)malloc(sizeof(task_entry));
@@ -180,13 +181,23 @@ int main() {
           }
           lf_pop_style_props();
         }
+        lf_push_font(&smallFont);
         LfUIElementProps props = lf_get_theme().text_props;
-        props.margin_top = 5.0f;
+        props.margin_top = 0.0f;
         props.margin_left = 4.0f;
         lf_push_style_props(props);
+
+        float descptr_x = lf_get_ptr_x();
         lf_text(entry->desc);
+
+        lf_set_ptr_x_absolute(descptr_x);
+        lf_set_ptr_y_absolute(lf_get_ptr_y() + smallFont.font_size);
+        props.text_color = (LfColor){150, 150, 150, 255};
+        lf_push_style_props(props);
+        lf_text(entry->date);
         lf_pop_style_props();
         lf_next_line();
+        lf_pop_font();
       }
       lf_div_end();
     }
