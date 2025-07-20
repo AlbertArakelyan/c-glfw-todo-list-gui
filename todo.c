@@ -145,6 +145,13 @@ int main() {
       uint32_t renderedcount = 0;
       for (uint32_t i = 0; i < numentries; i++) {
         task_entry* entry = entries[i];
+
+        if (current_filter == FILTER_LOW && entry->priority != PRIORITY_LOW) continue;
+        if (current_filter == FILTER_MEDIUM && entry->priority != PRIORITY_MEDIUM) continue;
+        if (current_filter == FILTER_HIGH && entry->priority != PRIORITY_HIGH) continue;
+        if (current_filter == FILTER_COMPLETED && !entry->completed) continue;
+        if (current_filter == FILTER_IN_PROGRESS && entry->completed) continue;
+
         float priority_size = 15.0f;
         float ptry_before = lf_get_ptr_y();
         lf_set_ptr_x_absolute(lf_get_ptr_x() + 5.0f);
