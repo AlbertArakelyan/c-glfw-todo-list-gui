@@ -114,12 +114,15 @@ int main() {
   smallFont = lf_load_font("./fonts/inter.ttf", 20);
 
   removetexture = lf_load_texture("./icons/remove.png", true, LF_TEX_FILTER_LINEAR);
-  task_entry* entry = (task_entry*)malloc(sizeof(task_entry));
-  entry->priority = PRIORITY_LOW;
-  entry->completed = false;
-  entry->date = "nothin";
-  entry->desc = "Buy a Hamster";
-  entries[numentries++] = entry;
+
+  for (uint32_t i = 0; i < 5; i++) {
+    task_entry* entry = (task_entry*)malloc(sizeof(task_entry));
+    entry->priority = PRIORITY_LOW;
+    entry->completed = false;
+    entry->date = "nothin";
+    entry->desc = "Buy a Hamster";
+    entries[numentries++] = entry;
+  }
 
   while(!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -184,7 +187,7 @@ int main() {
         lf_push_font(&smallFont);
         LfUIElementProps props = lf_get_theme().text_props;
         props.margin_top = 0.0f;
-        props.margin_left = 4.0f;
+        props.margin_left = 5.0f;
         lf_push_style_props(props);
 
         float descptr_x = lf_get_ptr_x();
@@ -192,6 +195,7 @@ int main() {
 
         lf_set_ptr_x_absolute(descptr_x);
         lf_set_ptr_y_absolute(lf_get_ptr_y() + smallFont.font_size);
+        lf_pop_style_props();
         props.text_color = (LfColor){150, 150, 150, 255};
         lf_push_style_props(props);
         lf_text(entry->date);
