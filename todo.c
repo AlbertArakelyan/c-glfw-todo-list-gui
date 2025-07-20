@@ -141,6 +141,8 @@ int main() {
                     ((vec2s){winw - lf_get_ptr_x() - WIN_MARGIN,
                     (winh - lf_get_ptr_y() - WIN_MARGIN)}),
                     true);
+
+      uint32_t renderedcount = 0;
       for (uint32_t i = 0; i < numentries; i++) {
         task_entry* entry = entries[i];
         float priority_size = 15.0f;
@@ -169,7 +171,10 @@ int main() {
           props.border_width = 0.0f; props.padding = 0.0f; props.margin_top = 1.0f; props.margin_left = 10.0f;
           lf_push_style_props(props);
           if (lf_image_button(((LfTexture){.id = removetexture.id, .width = 20, .height = 20})) == LF_CLICKED) {
-
+            for (uint32_t j = i; j < numentries - 1; j++) {
+              entries[j] = entries[j + 1];
+            }
+            numentries--;
           }
           lf_pop_style_props();
         }
@@ -180,7 +185,7 @@ int main() {
           props.color = lf_color_from_zto((vec4s){0.05f, 0.05f, 0.05f, 1.0f});
           lf_push_style_props(props);
           if (lf_checkbox("", &entry->completed, LF_NO_COLOR, ((LfColor){65, 167, 204, 255})) == LF_CLICKED) {
-
+            
           }
           lf_pop_style_props();
         }
@@ -200,8 +205,14 @@ int main() {
         lf_push_style_props(props);
         lf_text(entry->date);
         lf_pop_style_props();
-        lf_next_line();
         lf_pop_font();
+
+        lf_next_line();
+
+        renderedcount++;
+      }
+      if (!renderedcount) {
+        lf_text("There is no task here.");
       }
       lf_div_end();
     }
