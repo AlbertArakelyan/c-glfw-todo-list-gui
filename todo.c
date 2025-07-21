@@ -231,7 +231,7 @@ int main() {
     lf_next_line(); // kinda <br>
     renderfilters();
     lf_next_line();
-    renderfilters();
+    renderentries();
 
     lf_div_end();
     lf_end();
