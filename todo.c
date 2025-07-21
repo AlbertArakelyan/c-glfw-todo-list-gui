@@ -1,5 +1,7 @@
+#include <GL/gl.h>
 #include <GLFW/glfw3.h>
 #include <leif/leif.h>
+#include <stdint.h>
 
 typedef enum {
   FILTER_ALL = 0,
