@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <leif/leif.h>
 #include <stdint.h>
+#include <string.h>
 
 typedef enum {
   TAB_DASHBOARD = 0,
@@ -34,11 +35,15 @@ typedef struct {
 static int winw = 1280, winh = 720;
 static LfFont titleFont, smallFont;
 static entry_filter current_filter;
+static gui_tab current_tab;
 
 static task_entry* entries[1024];
 static uint32_t numentries = 0;
 
-static LfTexture removetexture;
+static LfTexture removetexture, backtexture;
+
+static LfInputField new_task_input;
+static char new_task_input_buf[512];
 
 static void rendertopbar() {
   lf_push_font(&titleFont); // Texts inside will use the mentioned font
@@ -55,7 +60,10 @@ static void rendertopbar() {
     props.border_width = 0.0f; props.corner_radius = 4.0f;
     lf_push_style_props(props); // Mentioned props/styles will apply to the elements between this push/pop calls
     lf_set_line_should_overflow(false);
-    lf_button_fixed("New Task", width, -1); // -1 takes normal height
+    if (lf_button_fixed("New Task", width, -1) == LF_CLICKED) {
+      // -1 takes normal height
+      current_tab = TAB_NEW_TASK;
+    }
     lf_set_line_should_overflow(true);
     lf_pop_style_props(); // Mentioned props/styles will apply to the elements between this push/pop calls
   }
@@ -192,6 +200,104 @@ static void renderentries() {
   lf_div_end();
 }
 
+static void rendernewtask() {
+  lf_push_font(&titleFont);
+  {
+    LfUIElementProps props = lf_get_theme().text_props;
+    props.margin_bottom = 15.0f;
+    lf_push_style_props(props);
+    lf_text("Add a new Task");
+    // maybe pop styles
+    lf_pop_style_props();
+    lf_pop_font();
+  }
+
+  lf_next_line();
+
+  {
+    lf_push_font(&smallFont);
+    lf_text("Description");
+    lf_pop_font();
+
+    lf_next_line();
+    LfUIElementProps props = lf_get_theme().inputfield_props;
+    props.padding = 15.0f;
+    props.color = lf_color_from_zto((vec4s){0.05f, 0.05f, 0.05f, 1.0f});
+    props.corner_radius = 11;
+    props.text_color = LF_WHITE;
+    props.border_width = 1;
+    props.border_color = new_task_input.selected ? LF_WHITE : (LfColor){170, 170, 170, 255};
+    props.corner_radius = 2.5f;
+    props.margin_bottom = 10.0f;
+    lf_push_style_props(props);
+    lf_input_text(&new_task_input);
+    lf_pop_style_props();
+  }
+
+  lf_next_line();
+
+  static int32_t selected_priority = -1;
+  {
+    lf_push_font(&smallFont);
+    lf_text("Priority");
+    lf_pop_font();
+
+    lf_next_line();
+    static const char* items[3] = {
+      "Low",
+      "Medium",
+      "High"
+    };
+    static bool opened = false;
+    LfUIElementProps props = lf_get_theme().button_props;
+    props.color = (LfColor){70, 70, 70, 255};
+    props.text_color = LF_WHITE;
+    props.border_width = 0.0f; props.corner_radius = 5.0f;
+    lf_push_style_props(props);
+    lf_dropdown_menu(items, "Priority", 3, 200, 80, &selected_priority, &opened);
+    lf_pop_style_props();
+  }
+
+  {
+    bool form_complete = (strlen(new_task_input_buf) && selected_priority != -1);
+    const char* text = "Add";
+    const float width = 150.0f;
+
+    LfUIElementProps props = lf_get_theme().button_props;
+    props.margin_left = 0.0f; props.margin_right = 0.0f;
+    props.corner_radius = 5.0f; props.border_width = 0.0f;
+    props.color = !form_complete ? (LfColor){80, 80, 80, 255} : (LfColor){65, 167, 204, 255};
+    lf_push_style_props(props);
+    lf_set_line_should_overflow(false);
+    lf_set_ptr_x_absolute(winw - (width + props.padding * 2.0f) - WIN_MARGIN);
+    lf_set_ptr_y_absolute(winh - (lf_button_dimension(text).y + props.padding * 2.0f) - WIN_MARGIN);
+    if (lf_button_fixed(text, width, -1) == LF_CLICKED && form_complete) {
+
+    }
+    lf_set_line_should_overflow(true);
+    lf_pop_style_props();
+  }
+
+  lf_next_line();
+  {
+    LfUIElementProps props = lf_get_theme().button_props;
+    props.color = LF_NO_COLOR; props.border_width = 0.0f;
+    props.padding = 0.0f; props.margin_left = 0.0f; props.margin_top = 0.0f;
+    props.margin_right = 0.0f; props.margin_bottom = 0.0f;
+    lf_push_style_props(props);
+    lf_set_line_should_overflow(false);
+    LfTexture backbutton = (LfTexture){.id = backtexture.id, .width = 20, .height = 40};
+    lf_set_ptr_y_absolute(winh - backbutton.height - WIN_MARGIN * 2.0f);
+    lf_set_ptr_x_absolute(WIN_MARGIN);
+
+    if (lf_image_button(backbutton) == LF_CLICKED) {
+      current_tab = TAB_DASHBOARD;
+    }
+    lf_set_line_should_overflow(true);
+    lf_pop_style_props();
+  }
+}
+
 int main() {
   glfwInit();
 
@@ -209,6 +315,15 @@ int main() {
   smallFont = lf_load_font("./fonts/inter.ttf", 20);
 
   removetexture = lf_load_texture("./icons/remove.png", true, LF_TEX_FILTER_LINEAR);
+  backtexture = lf_load_texture("./icons/back.png", true, LF_TEX_FILTER_LINEAR);
+
+  memset(new_task_input_buf, 0, 512);
+  new_task_input = (LfInputField){
+    .width = 400,
+    .buf = new_task_input_buf,
+    .buf_size = 512,
+    .placeholder = "What is there to do?"
+  };
 
   for (uint32_t i = 0; i < 5; i++) {
     task_entry* entry = (task_entry*)malloc(sizeof(task_entry));
@@ -227,11 +342,21 @@ int main() {
 
     lf_div_begin(((vec2s){WIN_MARGIN, WIN_MARGIN}), ((vec2s){winw - WIN_MARGIN * 2.0f, winh - WIN_MARGIN * 2.0f}), true);
 
-    rendertopbar();
-    lf_next_line(); // kinda <br>
-    renderfilters();
-    lf_next_line();
-    renderentries();
+    switch(current_tab) {
+      case TAB_DASHBOARD: {
+        rendertopbar();
+        lf_next_line(); // kinda <br>
+        renderfilters();
+        lf_next_line();
+        renderentries();
+        break;
+      }
+      case TAB_NEW_TASK: {
+        rendernewtask();
+        break;
+      }
+    }
+    
 
     lf_div_end();
     lf_end();
