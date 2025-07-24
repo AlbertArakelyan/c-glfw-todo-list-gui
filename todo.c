@@ -64,6 +64,7 @@ static void rendertopbar() {
       // -1 takes normal height
       current_tab = TAB_NEW_TASK;
     }
+    // contiue from here - https://youtu.be/xf2W1wZozbk?t=4132
     lf_set_line_should_overflow(true);
     lf_pop_style_props(); // Mentioned props/styles will apply to the elements between this push/pop calls
   }
@@ -250,12 +251,13 @@ static void rendernewtask() {
     };
     static bool opened = false;
     LfUIElementProps props = lf_get_theme().button_props;
-    props.color = (LfColor){70, 70, 70, 255};
+    props.color = (LfColor){70, 70, 70, 255}; // This causes all background issues after clicking to "New Task" 1
     props.text_color = LF_WHITE;
     props.border_width = 0.0f; props.corner_radius = 5.0f;
     lf_push_style_props(props);
     lf_dropdown_menu(items, "Priority", 3, 200, 80, &selected_priority, &opened);
     lf_pop_style_props();
+    lf_pop_style_props(); // For fixing background color issues after going to tab "New Task" 
   }
 
   {
@@ -267,10 +269,10 @@ static void rendernewtask() {
     props.margin_left = 0.0f; props.margin_right = 0.0f;
     props.corner_radius = 5.0f; props.border_width = 0.0f;
     props.color = !form_complete ? (LfColor){80, 80, 80, 255} : (LfColor){65, 167, 204, 255};
-    lf_push_style_props(props);
+    lf_push_style_props(props); // This causes all background issuse after clicking to "New Task" 2
     lf_set_line_should_overflow(false);
-    lf_set_ptr_x_absolute(winw - (width + props.padding * 2.0f) - WIN_MARGIN);
-    lf_set_ptr_y_absolute(winh - (lf_button_dimension(text).y + props.padding * 2.0f) - WIN_MARGIN);
+    lf_set_ptr_x_absolute(winw - (width + lf_get_theme().button_props.padding * 2.0f) - WIN_MARGIN);
+    lf_set_ptr_y_absolute(winh - (lf_button_dimension(text).y + lf_get_theme().button_props.padding * 2.0f) - WIN_MARGIN);
     if (lf_button_fixed(text, width, -1) == LF_CLICKED && form_complete) {
 
     }
