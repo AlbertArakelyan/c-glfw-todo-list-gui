@@ -48,6 +48,101 @@ static LfTexture removetexture, backtexture;
 static LfInputField new_task_input;
 static char new_task_input_buf[512];
 
+static void serialize_todo_entry(FILE* file, task_entry* entry) {
+  fwrite(&entry->completed, sizeof(bool), 1, file);
+
+  size_t desclen = strlen(entry->desc) + 1;
+  fwrite(&desclen, sizeof(size_t), 1, file);
+  fwrite(entry->desc, sizeof(char), desclen, file);
+
+  size_t datelen = strlen(entry->date) + 1;
+  fwrite(&datelen, sizeof(size_t), 1, file);
+  fwrite(entry->date, sizeof(char), datelen, file);
+
+  fwrite(&entry->priority, sizeof(entry_priority), 1, file);
+}
+
+static void serialize_todo_list(const char* filename) {
+  FILE* file = fopen(filename, "wb"); // wb -> wrtie bytes
+  if (!file) {
+    printf("Failed to open data file.\n");
+    return;
+  }
+
+  for (uint32_t i = 0; i < numentries; i++) {
+    serialize_todo_entry(file, entries[i]);
+  }
+}
+
+task_entry* deserelize_todo_entry(FILE* file) {
+  task_entry* entry = (task_entry*)malloc(sizeof(*entry));
+
+  if (fread(&entry->completed, sizeof(bool), 1, file) != 1) {
+    free(entry);
+    return NULL;
+  }
+
+  size_t desclen;
+  if (fread(&desclen, sizeof(size_t), 1, file) != 1) {
+    free(entry);
+    return NULL;
+  }
+  entry->desc = malloc(desclen);
+  if (!entry->desc) {
+    free(entry);
+    return NULL; 
+  }
+  if (fread(entry->desc, sizeof(char), desclen, file) != desclen) {
+    free(entry->desc);
+    free(entry);
+    return NULL; 
+  }
+
+  size_t datelen;
+  if (fread(&datelen, sizeof(size_t), 1, file) != 1) {
+    free(entry->desc);
+    free(entry);
+    return NULL; 
+  }
+  entry->date = malloc(datelen);
+  if (!entry->date) {
+    free(entry->desc);
+    free(entry);
+    return NULL; 
+  }
+  if (fread(entry->date, sizeof(char), datelen, file) != datelen) {
+    free(entry->desc);
+    free(entry->date);
+    free(entry);
+    return NULL; 
+  }
+
+  if (fread(&entry->priority, sizeof(entry_priority), 1, file) != 1) {
+    free(entry->desc);
+    free(entry->date);
+    free(entry);
+    return NULL; 
+  }
+
+  return entry;
+}
+
+void deserialize_todo_list(const char* filename) {
+  FILE* file = fopen(filename, "rb");
+  if (!file) {
+    file = fopen(filename, "w");
+    fclose(file);
+    file = fopen(filename, "rb");
+  }
+
+  task_entry* entry;
+
+  while ((entry = deserelize_todo_entry(file)) != NULL) {
+    entries[numentries++] = entry;
+  }
+  fclose(file);
+}
+
 char* get_command_output(const char* cmd) {
   FILE *fp;
   char buffer[1024];
@@ -345,6 +440,7 @@ static void rendernewtask() {
 
       memset(new_task_input_buf, 0, 512);
       sort_entries_by_priority();
+      serialize_todo_list("./tododata.bin");
     }
     lf_set_line_should_overflow(true);
     lf_pop_style_props();
@@ -397,9 +493,7 @@ int main() {
     .placeholder = "What is there to do?"
   };
 
-  for (uint32_t i = 0; i < 5; i++) {
-
-  }
+  deserialize_todo_list("./tododata.bin");
 
   while(!glfwWindowShouldClose(window)) {
     glClear(GL_COLOR_BUFFER_BIT);
