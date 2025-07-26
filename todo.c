@@ -178,6 +178,19 @@ static void renderentries() {
     float ptry_before = lf_get_ptr_y();
     lf_set_ptr_x_absolute(lf_get_ptr_x() + 5.0f);
     lf_set_ptr_y_absolute(lf_get_ptr_y() + 5.0f);
+
+    bool clicked_priority = lf_hovered((vec2s){lf_get_ptr_x(), lf_get_ptr_y()}, (vec2s){priority_size, priority_size})
+      && lf_mouse_button_went_down(GLFW_MOUSE_BUTTON_LEFT);
+
+    if (clicked_priority) {
+      if (entry->priority + 1 >= PRIORITY_HIGH + 1) {
+        entry->priority = 0;
+      } else {
+        entry->priority++;
+      }
+      sort_entries_by_priority();
+    }
+    
     switch(entry->priority) {
       case PRIORITY_LOW: {
         lf_rect(priority_size, priority_size, (LfColor){76, 175, 80, 255}, 4.0f);
