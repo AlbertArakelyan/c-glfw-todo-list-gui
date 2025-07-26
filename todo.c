@@ -81,6 +81,16 @@ char* get_command_output(const char* cmd) {
   return result;
 }
 
+static int compare_entry_priority(const void* a, const void* b) {
+  task_entry* entry_a = *(task_entry**)a;
+  task_entry* entry_b = *(task_entry**)b;
+  return (entry_b->priority - entry_a->priority);
+}
+
+static void sort_entries_by_priority() {
+  qsort(entries, numentries, sizeof(task_entry*), compare_entry_priority);
+}
+
 static void rendertopbar() {
   lf_push_font(&titleFont); // Texts inside will use the mentioned font
   lf_text("Your To Do");
@@ -321,6 +331,7 @@ static void rendernewtask() {
       entries[numentries++] = entry;
 
       memset(new_task_input_buf, 0, 512);
+      sort_entries_by_priority();
     }
     lf_set_line_should_overflow(true);
     lf_pop_style_props();
