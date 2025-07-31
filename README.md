@@ -15,7 +15,8 @@ gcc todo.c -o todo -lglfw -lGL -lleif -lclipboard -lm -lxcb
 ```
 
 \* Which package gave error googled how to install or how to fix <br>
-especially updating OpenGL version at this URL: https://stackoverflow.com/questions/19901934/libpthread-so-0-error-adding-symbols-dso-missing-from-command-line
+especially updating OpenGL version at this URL: ~~https://stackoverflow.com/questions/19901934/libpthread-so-0-error-adding-symbols-dso-missing-from-command-line~~
+https://askubuntu.com/a/1319567/2308596
 
 \* For one of packages `pkg-config` package manageer was needed installed via this command
 ```bash
