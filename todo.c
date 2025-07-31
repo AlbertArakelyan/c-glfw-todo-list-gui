@@ -312,6 +312,7 @@ static void renderentries() {
           entries[j] = entries[j + 1];
         }
         numentries--;
+        serialize_todo_list("./tododata.bin");
       }
       lf_pop_style_props();
     }
@@ -322,7 +323,7 @@ static void renderentries() {
       props.color = lf_color_from_zto((vec4s){0.05f, 0.05f, 0.05f, 1.0f});
       lf_push_style_props(props);
       if (lf_checkbox("", &entry->completed, LF_NO_COLOR, ((LfColor){65, 167, 204, 255})) == LF_CLICKED) {
-        
+        serialize_todo_list("./tododata.bin");     
       }
       lf_pop_style_props();
     }
@@ -426,7 +427,7 @@ static void rendernewtask() {
     lf_set_line_should_overflow(false);
     lf_set_ptr_x_absolute(winw - (width + lf_get_theme().button_props.padding * 2.0f) - WIN_MARGIN);
     lf_set_ptr_y_absolute(winh - (lf_button_dimension(text).y + lf_get_theme().button_props.padding * 2.0f) - WIN_MARGIN);
-    if (lf_button_fixed(text, width, -1) == LF_CLICKED && form_complete) {
+    if ((lf_button_fixed(text, width, -1) == LF_CLICKED || lf_key_went_down(GLFW_KEY_ENTER)) && form_complete) {
       task_entry* entry = (task_entry*)malloc(sizeof(task_entry));
       entry->priority = selected_priority;
       entry->completed = false;
@@ -439,6 +440,8 @@ static void rendernewtask() {
       entries[numentries++] = entry;
 
       memset(new_task_input_buf, 0, 512);
+      new_task_input.cursor_index = 0; // after creating a todo and resetting input value resetting cursor index is a must
+      lf_input_field_unselect_all(&new_task_input);
       sort_entries_by_priority();
       serialize_todo_list("./tododata.bin");
     }
@@ -477,6 +480,7 @@ int main() {
 
   LfTheme theme = lf_get_theme();
   theme.div_props.color = LF_NO_COLOR;
+  theme.scrollbar_props.corner_radius = 2;
   lf_set_theme(theme);
 
   titleFont = lf_load_font("./fonts/inter-bold.ttf", 40);
